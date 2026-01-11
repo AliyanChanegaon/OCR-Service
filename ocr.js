@@ -1,5 +1,4 @@
 import { DocumentAnalysisClient, AzureKeyCredential } from "@azure/ai-form-recognizer";
-import fs from "fs";
 import "dotenv/config";
 
 const client = new DocumentAnalysisClient(
@@ -7,12 +6,11 @@ const client = new DocumentAnalysisClient(
   new AzureKeyCredential(process.env.AZURE_KEY)
 );
 
-export async function runOCR(filePath) {
-  const file = fs.readFileSync(filePath);
-
+export async function runOCRBuffer(fileBuffer) {
+  
   const poller = await client.beginAnalyzeDocument(
     "prebuilt-read",
-    file
+    fileBuffer
   );
 
   const result = await poller.pollUntilDone();

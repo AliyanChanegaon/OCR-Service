@@ -1,23 +1,21 @@
 import express from "express";
 import multer from "multer";
-import fs from "fs";
-import "dotenv/config";
-import { runOCR } from "./ocr.js";
-import cors from 'cors';
+import cors from "cors";
+import { runOCRBuffer } from "./ocr.js"; // updated function
 
 const app = express();
-const upload = multer({ dest: "uploads/" });
-app.use(express.json());
+const storage = multer.memoryStorage();   // memory storage
+const upload = multer({ storage });
+
 app.use(cors());
+
 app.post("/v1/ocr", upload.single("file"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: "PDF file is required" });
     }
 
-    const pages = await runOCR(req.file.path);
-
-    fs.unlinkSync(req.file.path);
+    const pages = await runOCRBuffer(req.file.buffer);
 
     res.json({
       success: true,
@@ -34,6 +32,6 @@ app.post("/v1/ocr", upload.single("file"), async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`OCR Server running on port ${process.env.PORT}`);
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`OCR Server running on port ${process.env.PORT || 3000}`);
 });
